@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Mini Blog</title>
+
+    <style>
+
+        body {
+            font-family: Bookman Old style;
+            background-color: pink;
+            margin: 0;
+        }
+
+        header {
+            background-color: #515050;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 60%;
+            margin: 20px auto;
+        }
+
+        .box {
+            background-color:white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 80px;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stats b {
+            font-size: 22px;
+        }
+
+        .post {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        .logout {
+            background-color: #c0392b;
+            float: right;
+        }
+
+        #loginPage,
+        #registerPage {
+            display: block;
+        }
+
+        #mainPage {
+            display: none;
+        }
+
+        #registerPage {
+            display: none;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- HEADER -->
+
+    <header>
+
+        <h1>Mini Blog</h1>
+
+        <p>Share your thoughts with others</p>
+
+    </header>
+
+
+    <!-- LOGIN PAGE -->
+
+    <div class="container" id="loginPage">
+
+        <div class="box">
+
+            <h2>🔐 Login</h2>
+
+            <input type="text"
+                   id="loginUsername"
+                   placeholder="Enter username">
+
+            <input type="password"
+                   id="loginPassword"
+                   placeholder="Enter password">
+
+            <button onclick="login()">
+                Login
+            </button>
+
+            <p id="loginMessage"></p>
+
+            <p>
+                Don't have an account?
+                <button onclick="showRegister()">
+                    Register
+                </button>
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- REGISTER PAGE -->
+
+    <div class="container" id="registerPage">
+
+        <div class="box">
+
+            <h2>📝 Create Account</h2>
+
+            <input type="text"
+                   id="registerUsername"
+                   placeholder="Create username">
+
+            <input type="password"
+                   id="registerPassword"
+                   placeholder="Create password">
+
+            <button onclick="register()">
+                Register
+            </button>
+
+            <p id="registerMessage"></p>
+
+            <p>
+                Already have an account?
+                <button onclick="showLogin()">
+                    Login
+                </button>
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- MAIN PAGE -->
+
+    <div class="container" id="mainPage">
+
+        <button class="logout" onclick="logout()">Logout</button>
+
+
+        <!-- PROFILE -->
+
+        <div class="box">
+
+            <h2>
+                👤 <span id="profileName"></span>
+            </h2>
+
+            <div class="stats">
+
+                <div>
+
+                    <b id="postCount">0</b>
+
+                    <p>📝 Posts</p>
+
+                </div>
+
+
+                <div>
+                    <b id="followingCount">0</b>
+                    <p>👥 Following</p>
+                </div>
+                <div>
+                    <b id="followersCount">0</b>
+                    <p>👤 Followers</p>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- CREATE POST -->
+
+        <div class="box">
+
+            <h2>✨ Express Yourself</h2>
+            <textarea id="postContent"placeholder="Write your post"></textarea>
+            <button onclick="createPost()">Post</button>
+
+        </div>
+
+
+        <!-- FOLLOW USER -->
+
+        <div class="box">
+
+            <h2>🤝 Build Your Circle</h2>
+
+            <input
+                type="text"
+                id="followUsername"
+                placeholder="Enter username to follow">
+
+            <button onclick="followUser()">
+                Follow
+            </button>
+
+            <p id="followMessage"></p>
+
+        </div>
+
+
+        <!-- FEED -->
+
+        <div class="box">
+
+            <h2>🌍 Explore the Feed</h2>
+
+            <div id="feed"></div>
+
+        </div>
+
+    </div>
+    <script>
+
+       //Store all users
+
+        let users = {};
+
+        //Store currently logged-in user
+
+        let currentUser = "";
+        
+         //SHOW REGISTER PAGE
+
+        function showRegister() {
+
+            document.getElementById("loginPage").style.display = "none";
+
+            document.getElementById("registerPage").style.display = "block";
+
+            document.getElementById("registerMessage").innerHTML="";
+
+        }
+        
+        //SHOW LOGIN PAGE
+       
+        function showLogin() {
+
+            document.getElementById("registerPage").style.display = "none";
+            document.getElementById("loginPage").style.display = "block";
+
+        }
+        
+        // REGISTER
+        
+        function register() {
+
+            let username =document.getElementById("registerUsername").value;
+            let password =document.getElementById("registerPassword").value;
+
+
+            // Check empty fields
+
+            if (username == "" || password == "") {
+                document.getElementById("registerMessage").innerHTML ="Please enter username and password";
+                return;
+            }
+
+            // Check whether username already exists
+
+            if (users[username] != undefined) {
+                document.getElementById("registerMessage").innerHTML ="Username already exists";
+                return;
+
+            }
+
+
+            // Create new user
+
+            users[username] = {
+                password: password,
+                posts: [],
+                following: [],
+                followers: []
+            };
+
+
+            document.getElementById("registerMessage").innerHTML ="Account created successfully!";
+
+
+            // Clear input
+
+            document.getElementById("registerUsername").value = "";
+            document.getElementById("registerPassword").value = "";
+
+
+            // Go to login page
+
+            showLogin();
+        }
+
+        // LOGIN
+        
+        function login() {
+
+            let username =document.getElementById("loginUsername").value;
+            let password =document.getElementById("loginPassword").value;
+
+
+            // Check user
+
+            if (users[username] == undefined) {
+                document.getElementById("loginMessage").innerHTML ="User not found";
+                return;
+            }
+
+
+            // Check password
+
+            if (users[username].password != password) {
+                document.getElementById("loginMessage").innerHTML ="Wrong password";
+                return;
+
+            }
+
+
+            // Store logged-in user
+
+            currentUser = username;
+            document.getElementById("followMessage").innerHTML="";
+            document.getElementById("followUsername").value="";
+
+
+            // Hide login
+
+            document.getElementById("loginPage").style.display = "none";
+
+
+            // Show main page
+
+            document.getElementById("mainPage").style.display = "block";
+
+            // Display profile and feed
+
+            showProfile();
+            showFeed();
+        }
+
+        // SHOW PROFILE
+       
+
+        function showProfile() {
+
+            let user = users[currentUser];
+            document.getElementById("profileName").innerHTML = currentUser;
+            document.getElementById("postCount").innerHTML = user.posts.length;
+            document.getElementById("followingCount").innerHTML = user.following.length;
+            document.getElementById("followersCount").innerHTML = user.followers.length;
+        }
+        
+        // CREATE POST
+        
+
+        function createPost() {
+
+            let content =document.getElementById("postContent").value;
+
+            if (content == "") {
+                alert("Please write something");
+                return;
+            }
+
+
+            // Add post to current user's posts
+
+            users[currentUser].posts.push({
+
+                content: content,
+
+                likes: 0
+
+            });
+
+
+            // Clear textarea
+
+            document.getElementById("postContent").value = "";
+
+
+            // Update profile and feed
+
+            showProfile();
+
+            showFeed();
+
+        }
+        
+        // FOLLOW USER
+        
+
+        function followUser() {
+
+            let username =document.getElementById("followUsername").value;
+            if(users[username]==undefined)
+        {
+            alert("User not found");
+            return;
+        }
+        
+
+
+            // Add user to following list
+
+            users[currentUser].following.push(username);
+
+
+            // Add current user to follower list
+
+            users[username].followers.push(currentUser);
+
+
+            // Clear input
+
+            document.getElementById("followUsername").value = "";
+
+
+            document.getElementById("followMessage").innerHTML ="You are now following " + username;
+
+
+            // Update profile
+
+            showProfile();
+
+        }
+
+
+
+        
+        // SHOW FEED
+        
+
+        function showFeed() {
+
+            let feed = "";
+
+
+            // Show own posts
+
+            for (let i = 0;i < users[currentUser].posts.length;i++
+            ) {
+
+                feed +=
+
+                    "<div class='post'>" +
+
+                    "<h3>@" +
+                    currentUser +
+                    "</h3>" +
+
+                    "<p>" +
+                    users[currentUser]
+                    .posts[i]
+                    .content +
+                    "</p>" +
+
+                    "<button onclick='likePost(\"" +
+                    currentUser +
+                    "\"," +
+                    i +
+                    ")'>" +
+
+                    "❤️ Like " +
+                    users[currentUser]
+                    .posts[i]
+                    .likes +
+
+                    "</button>" +
+
+                    "</div>";
+
+            }
+
+
+
+            // Show posts from followed users
+
+            for (let i = 0;i < users[currentUser].following.length;i++
+            ) {
+
+
+                let followedUser =users[currentUser].following[i];
+                let posts =users[followedUser].posts;
+
+
+                for (let j = 0;j < posts.length;j++) {
+
+                    feed +=
+
+                        "<div class='post'>" +
+
+                        "<h3>@" +
+                        followedUser +
+                        "</h3>" +
+
+                        "<p>" +
+                        posts[j].content +
+                        "</p>" +
+
+                        "<button onclick='likePost(\"" +
+                        followedUser +
+                        "\"," +
+                        j +
+                        ")'>" +
+
+                        "❤️ Like " +
+                        posts[j].likes +
+
+                        "</button>" +
+
+                        "</div>";
+                }
+            }
+            // If there are no posts
+
+            if (feed == "") {
+
+                feed ="No posts to show.";
+
+            }
+            // Display feed
+
+            document.getElementById("feed").innerHTML = feed;
+        }        
+        // LIKE POST
+        
+        function likePost(username, index) {
+            users[username].posts[index].likes++;
+            showFeed();
+        }        
+        // LOGOUT
+ 
+        function logout() {
+            currentUser = "";
+            document.getElementById("mainPage").style.display = "none";
+            document.getElementById("loginPage").style.display = "block";
+            document.getElementById("loginUsername").value = "";
+            document.getElementById("loginPassword").value = "";
+        }
+    </script>
+</body>
+</html>
